@@ -1,0 +1,125 @@
+{
+  "isSiteUp": true,
+  "trafficCount": 3,
+  "reasons": [
+    {
+      "id": "1",
+      "number": 1,
+      "category": "Education",
+      "title": "Education Rebirth in Anambra",
+      "content": "Returned schools to missions and provided massive funding, moving Anambra from 24th to 1st in NECO/WAEC examinations.",
+      "citation": "https://vanguardngr.com",
+      "readMoreLink": "https://example.com/read-more",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "2",
+      "number": 2,
+      "category": "Economy",
+      "title": "Fiscal Prudence",
+      "content": "Saved approximately 75 billion Naira in local and foreign currencies for Anambra State before leaving office, unprecedented in Nigeria.",
+      "citation": "https://premiumtimesng.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "3",
+      "number": 3,
+      "category": "Infrastructure",
+      "title": "Massive Road Networks",
+      "content": "Constructed over 800km of roads, giving Anambra the best road network in Nigeria and opening up rural agricultural areas.",
+      "citation": "https://dailytrust.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "4",
+      "category": "Governance",
+      "number": 4,
+      "title": "Reducing Cost of Governance",
+      "content": "Cut down the governor's convoy, removed excessive security aides, and stopped using sirens to forcefully clear traffic, demonstrating servant leadership.",
+      "citation": "https://punchng.com",
+      "status": "approved"
+    },
+    {
+      "id": "5",
+      "number": 5,
+      "category": "Healthcare",
+      "title": "Healthcare Revitalization",
+      "content": "Built the Chukwuemeka Odumegwu Ojukwu University Teaching Hospital from scratch, and revitalized several general hospitals across the state.",
+      "citation": "https://channelstv.com",
+      "status": "approved"
+    },
+    {
+      "id": "6",
+      "number": 6,
+      "category": "Security",
+      "title": "Unprecedented Security",
+      "content": "Dismantled criminal networks in Anambra, heavily funding security agencies and community vigilantes, transforming the state into one of the safest in Nigeria.",
+      "citation": "https://vanguardngr.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "7",
+      "number": 7,
+      "category": "Economy",
+      "title": "Foreign Direct Investment",
+      "content": "Attracted significant Foreign Direct Investment into the agricultural and manufacturing sectors, driving Anambra's industrialization.",
+      "citation": "https://vanguardngr.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "8",
+      "number": 8,
+      "category": "Governance",
+      "title": "Integrity and Transparency",
+      "content": "Demonstrated an unblemished record of transparency in public service, consistently rejecting embezzlement and corrupt practices.",
+      "citation": "https://premiumtimesng.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "9",
+      "number": 9,
+      "category": "Education",
+      "title": "Digital Literacy in Schools",
+      "content": "Initiated the distribution of laptops to secondary schools and equipped computer laboratories across the state to boost digital literacy.",
+      "citation": "https://dailytrust.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "10",
+      "number": 10,
+      "category": "Healthcare",
+      "title": "Partnership with Health Agencies",
+      "content": "Partnered with global health organizations to deliver immunizations and drastically reduce maternal and infant mortality rates.",
+      "citation": "https://punchng.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "11",
+      "number": 11,
+      "category": "Infrastructure",
+      "title": "Public-Private Partnerships",
+      "content": "Leveraged PPP models to develop state-of-the-art markets and business hubs, empowering local traders and SMEs.",
+      "citation": "https://channelstv.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    },
+    {
+      "id": "12",
+      "number": 12,
+      "category": "Other",
+      "title": "Youth Empowerment",
+      "content": "Created multiple skill acquisition programs and startup grants to foster youth entrepreneurship and reduce unemployment.",
+      "citation": "https://vanguardngr.com",
+      "status": "approved",
+      "submittedBy": "Admin"
+    }
+  ]
+}
