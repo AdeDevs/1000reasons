@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { ReasonCard } from '../components/ReasonCard';
 import { Reason } from '../types';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { fetchReasons as getReasons } from '../lib/api';
 
 export default function Home() {
   const [reasons, setReasons] = useState<Reason[]>([]);
   const [featuredReason, setFeaturedReason] = useState<Reason | null>(null);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
@@ -19,10 +20,10 @@ export default function Home() {
     try {
       const data = await getReasons({
         page: 1,
-        limit: 6, // Request exactly 6 per page
+        limit: 1000, // Fetch all reasons
       });
       setReasons(data.data);
-      if (data.data.length > 0 && !featuredReason) {
+      if (data.data.length > 0) {
          setFeaturedReason(data.data[0]);
       }
       setError(null);
@@ -36,6 +37,33 @@ export default function Home() {
   useEffect(() => {
     fetchReasons();
   }, []);
+
+  // Update featured reason every 12 seconds
+  useEffect(() => {
+    if (reasons.length === 0) return;
+    const interval = setInterval(() => {
+      setFeaturedIndex(prev => (prev + 1) % reasons.length);
+    }, 12000);
+    return () => clearInterval(interval);
+  }, [reasons]);
+
+  useEffect(() => {
+    if (reasons.length > 0) {
+      setFeaturedReason(reasons[featuredIndex]);
+    }
+  }, [featuredIndex, reasons]);
+
+  // Pick 6 alternated reasons at random
+  const todayPicks = useMemo(() => {
+    if (reasons.length <= 6) return reasons;
+    // Fisher-Yates shuffle
+    let shuffled = [...reasons];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled.slice(0, 6);
+  }, [reasons]);
 
   if (error === 'Site is down for maintenance.') {
     return (
@@ -51,9 +79,37 @@ export default function Home() {
   return (
     <div className="w-full flex flex-col flex-1">
       {/* 100VH Hero Section */}
-      <div className="min-h-screen bg-slate-900 text-white w-full px-6 md:px-12 lg:px-20 relative overflow-hidden flex items-center justify-center pt-24 pb-12 lg:pt-28">
+      <div className="min-h-[100svh] bg-slate-900 text-white w-full px-6 md:px-12 lg:px-20 relative overflow-hidden flex items-center justify-center pt-24 pb-12 lg:pt-28">
         <div className="absolute inset-0 opacity-[0.05]" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
         
+        {/* Mobile/Tablet Decorative Background Orbs */}
+        <div className="absolute inset-0 overflow-hidden lg:hidden pointer-events-none">
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.1, 0.15, 0.1],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-20 left-[-10%] w-72 h-72 bg-blue-500 rounded-full mix-blend-screen filter blur-[80px]"
+          />
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.3, 1],
+              opacity: [0.1, 0.2, 0.1],
+            }}
+            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-1/2 right-[-20%] w-80 h-80 bg-green-500 rounded-full mix-blend-screen filter blur-[80px]"
+          />
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.1, 1],
+              opacity: [0.05, 0.15, 0.05],
+            }}
+            transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+            className="absolute -bottom-10 left-[20%] w-60 h-60 bg-blue-400 rounded-full mix-blend-screen filter blur-[70px]"
+          />
+        </div>
+
         <div className="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
@@ -65,7 +121,7 @@ export default function Home() {
               1000 Reasons <br />
               <span className="font-cursive lowercase text-blue-400 tracking-normal text-5xl sm:text-6xl lg:text-7xl block mt-2 font-normal">to vote Peter Obi</span>
             </h1>
-            <p className="text-lg md:text-xl text-slate-300 font-medium mb-12 max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans mt-2">
+            <p className="text-sm text-white font-medium mb-10 max-w-xl mx-auto lg:mx-0 leading-relaxed font-sans mt-2">
               A comprehensive, crowd-sourced repository of verifiable achievements, proven policies, and a track record of integrity that envisions a new Nigeria.
             </p>
             
@@ -83,17 +139,26 @@ export default function Home() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-            className="hidden lg:flex justify-center lg:justify-end"
+            className="hidden lg:flex justify-center lg:justify-end relative"
           >
-            {featuredReason ? (
-              <div className="w-full max-w-[420px] aspect-[4/5] min-h-[450px] rotate-2 transition-transform duration-500 ease-out origin-bottom-right">
-                <ReasonCard reason={featuredReason} />
-              </div>
-            ) : (
-               <div className="w-full max-w-[420px] aspect-[4/5] min-h-[450px] border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 font-display uppercase tracking-widest rotate-2">
-                 Loading Canvas...
-               </div>
-            )}
+            <AnimatePresence mode="wait">
+              {featuredReason ? (
+                <motion.div 
+                  key={featuredReason.id}
+                  initial={{ opacity: 0, y: 20, rotate: 0 }}
+                  animate={{ opacity: 1, y: 0, rotate: 2 }}
+                  exit={{ opacity: 0, y: -20, rotate: -2 }}
+                  transition={{ duration: 0.5 }}
+                  className="w-full max-w-[420px] aspect-[4/5] min-h-[450px] origin-bottom-right"
+                >
+                  <ReasonCard reason={featuredReason} truncateLength={140} onClick={() => navigate(`/explore?reason=${featuredReason.number}`)} />
+                </motion.div>
+              ) : (
+                 <div className="w-full max-w-[420px] aspect-[4/5] min-h-[450px] border-2 border-dashed border-slate-700 flex flex-col items-center justify-center text-slate-500 font-display uppercase tracking-widest rotate-2">
+                   Loading Canvas...
+                 </div>
+              )}
+            </AnimatePresence>
           </motion.div>
 
         </div>
@@ -140,7 +205,7 @@ export default function Home() {
               }
             }}
           >
-            {reasons.map((reason) => (
+            {todayPicks.map((reason) => (
               <motion.div 
                 key={reason.id} 
                 className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] flex items-stretch min-h-[350px]"
@@ -149,7 +214,11 @@ export default function Home() {
                   show: { opacity: 1, y: 0 }
                 }}
               >
-                <ReasonCard reason={reason} />
+                <ReasonCard 
+                  reason={reason} 
+                  truncateLength={120} 
+                  onClick={() => navigate(`/explore?reason=${reason.number}`)}
+                />
               </motion.div>
             ))}
 

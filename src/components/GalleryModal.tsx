@@ -93,32 +93,82 @@ export function GalleryModal() {
           {loading && !activeReason ? (
             <div className="text-white font-display uppercase tracking-widest animate-pulse">Loading...</div>
           ) : activeReason ? (
-            <div className="relative w-full max-w-lg flex items-center justify-center" onClick={e => e.stopPropagation()}>
-              <button 
-                onClick={handlePrev}
-                disabled={currentIndex <= 0}
-                className="absolute -left-12 sm:-left-20 p-2 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                <ChevronLeft className="w-10 h-10" />
-              </button>
+            <div className="relative w-full max-w-lg flex flex-col items-center justify-center gap-6" onClick={e => e.stopPropagation()}>
+              <div className="relative w-full flex items-center justify-center">
+                <button 
+                  onClick={handlePrev}
+                  disabled={currentIndex <= 0}
+                  className="hidden sm:block absolute -left-12 sm:-left-20 p-2 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  <ChevronLeft className="w-10 h-10" />
+                </button>
 
-              <motion.div 
-                key={activeReason.number}
-                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                animate={{ scale: 1, opacity: 1, y: 0 }}
-                transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-                className="w-full"
-              >
-                <ReasonCard reason={activeReason} />
-              </motion.div>
+                <motion.div 
+                  key={activeReason.number}
+                  initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                  animate={{ scale: 1, opacity: 1, y: 0 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+                  className="w-full"
+                >
+                  <ReasonCard reason={activeReason} />
+                </motion.div>
 
-              <button 
-                onClick={handleNext}
-                disabled={currentIndex === -1 || currentIndex >= reasons.length - 1}
-                className="absolute -right-12 sm:-right-20 p-2 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
-              >
-                <ChevronRight className="w-10 h-10" />
-              </button>
+                <button 
+                  onClick={handleNext}
+                  disabled={currentIndex === -1 || currentIndex >= reasons.length - 1}
+                  className="hidden sm:block absolute -right-12 sm:-right-20 p-2 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                >
+                  <ChevronRight className="w-10 h-10" />
+                </button>
+              </div>
+
+              <div className="flex items-center justify-center w-full gap-4 sm:gap-6 text-slate-300">
+                <button 
+                  onClick={handlePrev}
+                  disabled={currentIndex <= 0}
+                  className="sm:hidden p-1 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-slate-800 rounded-none"
+                >
+                  <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+                
+                <div className="flex items-center gap-2">
+                  {(() => {
+                    const maxDots = 7;
+                    let startIdx = Math.max(0, currentIndex - Math.floor(maxDots / 2));
+                    let endIdx = Math.min(reasons.length - 1, startIdx + maxDots - 1);
+                    
+                    if (endIdx - startIdx + 1 < maxDots) {
+                      startIdx = Math.max(0, endIdx - maxDots + 1);
+                    }
+                    
+                    const dots = [];
+                    for (let i = startIdx; i <= endIdx; i++) {
+                      dots.push(
+                        <button
+                          key={i}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const params = new URLSearchParams(location.search);
+                            params.set('reason', String(reasons[i].number));
+                            navigate(`${location.pathname}?${params.toString()}`);
+                          }}
+                          className={`w-2 h-2 transition-all duration-300 ${i === currentIndex ? 'bg-white scale-125' : 'bg-white/30 hover:bg-white/50'}`}
+                          aria-label={`Go to reason ${i + 1}`}
+                        />
+                      );
+                    }
+                    return dots;
+                  })()}
+                </div>
+
+                <button 
+                  onClick={handleNext}
+                  disabled={currentIndex === -1 || currentIndex >= reasons.length - 1}
+                  className="sm:hidden p-1 text-white hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer bg-slate-800 rounded-none"
+                >
+                  <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              </div>
             </div>
           ) : (
              <div className="text-white font-display p-8 bg-slate-800 border-2 border-slate-900 text-center">Reason not found.</div>

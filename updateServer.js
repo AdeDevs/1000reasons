@@ -1,4 +1,7 @@
-import express from 'express';
+import fs from 'fs';
+import path from 'path';
+
+const content = `import express from 'express';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';
@@ -106,14 +109,14 @@ app.get('/api/reasons', async (req, res) => {
     
     let query = supabase.from('reasons').select('*', { count: 'exact' }).eq('status', 'approved');
     if (search) {
-      query = query.or(`title.ilike.%${search}%,content.ilike.%${search}%`);
+      query = query.or(\`title.ilike.%\${search}%,content.ilike.%\${search}%\`);
     }
     if (category && category !== 'All') {
       query = query.eq('category', category);
     }
 
     const start = (pg - 1) * lmt;
-    const { data, count } = await query.order('number', { ascending: true }).range(start, start + lmt - 1);
+    const { data, count } = await query.order('number', { ascending: false }).range(start, start + lmt - 1);
     
     return res.json({
       data: data || [],
@@ -126,7 +129,7 @@ app.get('/api/reasons', async (req, res) => {
   const data = getLocalData();
   if (!data.isSiteUp) return res.status(503).json({ error: 'Site is temporarily down for maintenance.' });
 
-  let filtered = data.reasons.filter((r: any) => r.status === 'approved').sort((a: any, b: any) => a.number - b.number);
+  let filtered = data.reasons.filter((r: any) => r.status === 'approved');
   if (search) {
     const q = String(search).toLowerCase();
     filtered = filtered.filter((r: any) => r.title.toLowerCase().includes(q) || r.content.toLowerCase().includes(q));
@@ -147,11 +150,12 @@ app.post('/api/reasons', async (req, res) => {
   if (!category || !content || !citation) return res.status(400).json({ error: 'Missing required fields' });
 
   if (supabase) {
+    // Generate a secure title
     const nextResult = await supabase.from('reasons').select('number').eq('status', 'approved').order('number', { ascending: false }).limit(1);
     const nextNumber = nextResult.data && nextResult.data.length > 0 ? (nextResult.data[0].number || 0) + 1 : 1;
 
     const { error } = await supabase.from('reasons').insert([{
-      number: nextNumber,
+      number: nextNumber, // Assigned on approval officially, but staged here
       category,
       title: content.substring(0, 30) + '...',
       content,
@@ -162,10 +166,7 @@ app.post('/api/reasons', async (req, res) => {
       anonymous
     }]);
 
-    if (error) {
-      console.error('Supabase insert error:', error);
-      return res.status(500).json({ error: 'Failed to submit: ' + error.message });
-    }
+    if (error) return res.status(500).json({ error: 'Failed to submit.' });
     return res.json({ message: 'Reason submitted for review!' });
   }
 
@@ -205,6 +206,7 @@ app.post('/api/mod/reasons/:id/approve', async (req, res) => {
     
     await supabase.from('reasons').update({ status: 'approved' }).eq('id', req.params.id);
     
+    // Recalculate numbers
     const { data: approved } = await supabase.from('reasons').select('id').eq('status', 'approved').order('created_at', { ascending: true });
     if (approved) {
       for (let i = 0; i < approved.length; i++) {
@@ -231,6 +233,7 @@ app.post('/api/mod/reasons/:id/approve', async (req, res) => {
 app.post('/api/mod/reasons/:id/delete', async (req, res) => {
   if (supabase) {
     await supabase.from('reasons').delete().eq('id', req.params.id);
+    // Recalculate numbers
     const { data: approved } = await supabase.from('reasons').select('id').eq('status', 'approved').order('created_at', { ascending: true });
     if (approved) {
       for (let i = 0; i < approved.length; i++) {
@@ -267,6 +270,7 @@ app.post('/api/mod/system/toggle', async (req, res) => {
   res.json({ isSiteUp: data.isSiteUp });
 });
 
+// Pre-load font for OG Image Generation
 let fontBuffer: ArrayBuffer | null = null;
 fetch('https://raw.githubusercontent.com/rsms/inter/master/docs/font-files/Inter-SemiBold.woff')
   .then(res => res.arrayBuffer())
@@ -290,7 +294,7 @@ app.get('/api/og', async (req, res) => {
         props: {
           style: { display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#1E293B', width: '1200px', height: '630px', padding: '80px', color: 'white', fontFamily: 'Inter', textAlign: 'center' },
           children: [
-            { type: 'div', props: { style: { fontSize: '80px', fontWeight: 600, color: '#60A5FA', marginBottom: '40px', lineHeight: 1 }, children: `Reason #${String(reason.number).padStart(3, '0')}` } },
+            { type: 'div', props: { style: { fontSize: '80px', fontWeight: 600, color: '#60A5FA', marginBottom: '40px', lineHeight: 1 }, children: \`Reason #\${String(reason.number).padStart(3, '0')}\` } },
             { type: 'div', props: { style: { fontSize: '48px', fontWeight: 600, color: '#CBD5E1', lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }, children: reason.content } },
             { type: 'div', props: { style: { position: 'absolute', bottom: '40px', fontSize: '32px', color: '#94A3B8', fontWeight: 600 }, children: '1000 Reasons • Documenting Institutional Legacy' } }
           ],
@@ -304,7 +308,7 @@ app.get('/api/og', async (req, res) => {
     const pngBuffer = pngData.asPng();
 
     res.setHeader('Content-Type', 'image/png');
-    res.setHeader('Cache-Control', 'public', 'max-age=86400');
+    res.setHeader('Cache-Control', 'public, max-age=86400');
     res.send(pngBuffer);
   } catch (err) {
     console.error('OG Image Generation Error:', err);
@@ -314,31 +318,31 @@ app.get('/api/og', async (req, res) => {
 
 async function injectHTML(req: any, templateString: string) {
   let html = templateString;
-  const url = new URL(req.originalUrl, `http://${req.headers.host || 'localhost'}`);
+  const url = new URL(req.originalUrl, \`http://\${req.headers.host || 'localhost'}\`);
   const searchParams = url.searchParams;
   const reasonNum = searchParams.get('reason');
 
   if (req.path === '/explore' && reasonNum) {
     const reason = await getReasonByNumber(reasonNum);
     if (reason) {
-      const ogTitle = `Reason #${String(reason.number).padStart(3, '0')} | 1000 Reasons`;
+      const ogTitle = \`Reason #\${String(reason.number).padStart(3, '0')} | 1000 Reasons\`;
       const ogDesc = reason.content;
-      const ogImage = `https://${req.get('host')}/api/og?reason=${reason.number}`;
+      const ogImage = \`https://\${req.get('host')}/api/og?reason=\${reason.number}\`;
 
-      html = html.replace('<title>1000 Reasons</title>', `<title>${ogTitle}</title>`);
-      const ogTags = `
-    <meta property="og:title" content="${ogTitle}" />
-    <meta property="og:description" content="${ogDesc}" />
-    <meta property="og:image" content="${ogImage}" />
+      html = html.replace('<title>1000 Reasons</title>', \`<title>\${ogTitle}</title>\`);
+      const ogTags = \`
+    <meta property="og:title" content="\${ogTitle}" />
+    <meta property="og:description" content="\${ogDesc}" />
+    <meta property="og:image" content="\${ogImage}" />
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:image" content="${ogImage}" />`;
-      html = html.replace('</head>', `${ogTags}\n  </head>`);
+    <meta property="twitter:image" content="\${ogImage}" />\`;
+      html = html.replace('</head>', \`\${ogTags}\\n  </head>\`);
     }
   }
   return html;
 }
 
-const startServer = async () => {
+async function startServer() {
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({ server: { middlewareMode: true }, appType: 'custom' });
     app.use(vite.middlewares);
@@ -357,31 +361,27 @@ const startServer = async () => {
       }
     });
   } else {
-    try {
-      const distPath = path.join(process.cwd(), 'dist');
-      app.use(express.static(distPath, { index: false }));
-      app.get('*', async (req, res) => {
-        if(req.path.startsWith('/api')) return res.status(404).end();
-        try {
-          let template = fs.readFileSync(path.join(distPath, 'index.html'), 'utf-8');
-          template = await injectHTML(req, template);
-          res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
-        } catch (e) {
-          res.status(500).end('Server Error');
-        }
-      });
-    } catch (e) {
-      console.warn("Vercel context: dist folder might not be served directly via express static");
-    }
-  }
-
-  if (!process.env.VERCEL) {
-    app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on port ${PORT}`);
+    const distPath = path.join(process.cwd(), 'dist');
+    app.use(express.static(distPath, { index: false }));
+    app.get('*', async (req, res) => {
+      if(req.path.startsWith('/api')) return res.status(404).end();
+      try {
+        let template = fs.readFileSync(path.join(distPath, 'index.html'), 'utf-8');
+        template = await injectHTML(req, template);
+        res.status(200).set({ 'Content-Type': 'text/html' }).end(template);
+      } catch (e) {
+        res.status(500).end('Server Error');
+      }
     });
   }
-};
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(\`Server running on port \${PORT}\`);
+  });
+}
 
 startServer();
+`;
 
-export default app;
+fs.writeFileSync(path.join(__dirname, 'server.ts'), content);
+console.log('Successfully updated server.ts!');

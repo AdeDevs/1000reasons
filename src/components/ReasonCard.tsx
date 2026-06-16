@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { toPng } from 'html-to-image';
-import { Download, ExternalLink } from 'lucide-react';
+import { Download, ExternalLink, Share2 as Share2Icon } from 'lucide-react';
 import { Reason } from '../types';
 
 const XIcon = ({ className }: { className?: string }) => (
@@ -21,7 +21,7 @@ const FacebookIcon = ({ className }: { className?: string }) => (
   </svg>
 );
 
-export function ReasonCard({ reason, onClick }: { reason: Reason, onClick?: () => void }) {
+export function ReasonCard({ reason, onClick, truncateLength }: { reason: Reason, onClick?: () => void, truncateLength?: number }) {
   const cardRef = useRef<HTMLDivElement>(null);
   const cardUrl = `${window.location.origin}/explore?reason=${reason.number}`;
 
@@ -35,6 +35,10 @@ export function ReasonCard({ reason, onClick }: { reason: Reason, onClick?: () =
     }
   };
 
+  const displayText = truncateLength && reason.content.length > truncateLength 
+    ? reason.content.substring(0, truncateLength) + '...'
+    : reason.content;
+
   const handleDownload = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (cardRef.current) {
@@ -46,6 +50,38 @@ export function ReasonCard({ reason, onClick }: { reason: Reason, onClick?: () =
         link.click();
       } catch (err) {
         console.error('Failed to generate image', err);
+      }
+    }
+  };
+
+  const handleNativeShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (cardRef.current && navigator.share) {
+      try {
+        const dataUrl = await toPng(cardRef.current, { cacheBust: true, pixelRatio: 2 });
+        const res = await fetch(dataUrl);
+        const blob = await res.blob();
+        const file = new File([blob], `reason-${reason.number}.png`, { type: blob.type });
+        const shareData = {
+          title: `1000 Reasons - #${reason.number}`,
+          text: `Reason #${String(reason.number).padStart(3, '0')}: ${reason.content}\n\nVia 1000 Reasons: ${cardUrl}`,
+          url: cardUrl,
+          files: [file],
+        };
+        if (navigator.canShare && navigator.canShare(shareData)) {
+          await navigator.share(shareData);
+        } else {
+          // fallback to text only
+          await navigator.share({
+            title: `1000 Reasons - #${reason.number}`,
+            text: `Reason #${String(reason.number).padStart(3, '0')}: ${reason.content}\n\nVia 1000 Reasons: ${cardUrl}`,
+            url: cardUrl
+          });
+        }
+      } catch (err) {
+        if ((err as Error).name !== 'AbortError') {
+          console.error('Error sharing:', err);
+        }
       }
     }
   };
@@ -85,13 +121,24 @@ export function ReasonCard({ reason, onClick }: { reason: Reason, onClick?: () =
         
         <div className="flex-1 flex flex-col justify-center items-center py-6">
           <p className="text-white leading-relaxed font-medium text-lg md:text-xl text-center font-display tracking-tight">
-            {reason.content}
+            {displayText}
           </p>
         </div>
 
         <div className="mt-4 pt-4 flex justify-between items-end text-[10px] md:text-xs font-bold border-t-2 border-blue-900/50 uppercase tracking-widest">
-          {reason.readMoreLink ? (
-            <a onClick={(e) => e.stopPropagation()} href={reason.readMoreLink} target="_blank" rel="noopener noreferrer" className="cursor-pointer text-blue-200 hover:text-white transition-colors flex items-center gap-1 truncate mr-2">
+          {(reason.readMoreLink || (truncateLength && reason.content.length > truncateLength)) ? (
+            <a onClick={(e) => {
+                if (!reason.readMoreLink) {
+                   e.preventDefault(); // allow onClick of card to handle it
+                } else {
+                   e.stopPropagation();
+                }
+              }} 
+              href={reason.readMoreLink || '#'} 
+              target={reason.readMoreLink ? "_blank" : "_self"} 
+              rel="noopener noreferrer" 
+              className="cursor-pointer text-blue-200 hover:text-white transition-colors flex items-center gap-1 truncate mr-2"
+            >
               Read More
             </a>
           ) : (
@@ -120,12 +167,23 @@ export function ReasonCard({ reason, onClick }: { reason: Reason, onClick?: () =
             <WhatsAppIcon className="w-4 h-4" />
           </button>
         </div>
-        <button 
-          onClick={handleDownload}
-          className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-white border-2 border-slate-900 text-slate-900 font-black uppercase text-xs hover:bg-slate-100 hover:translate-y-[2px] hover:translate-x-[2px] transition-all shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:shadow-none duration-200"
-        >
-          <Download className="w-4 h-4" strokeWidth={3} /> Export
-        </button>
+        <div className="flex gap-2">
+          {navigator.share && navigator.canShare && (
+            <button 
+              onClick={handleNativeShare}
+              className="cursor-pointer flex items-center justify-center p-2 bg-blue-500 text-white hover:bg-blue-600 hover:translate-y-[2px] hover:translate-x-[2px] transition-all shadow-[2px_2px_0px_0px_rgba(15,23,42,1)] active:shadow-none duration-200"
+              title="Share Card"
+            >
+              <Share2Icon className="w-4 h-4 text-white" />
+            </button>
+          )}
+          <button 
+            onClick={handleDownload}
+            className="cursor-pointer flex items-center gap-2 px-4 py-2 bg-white border-2 border-slate-900 text-slate-900 font-black uppercase text-xs hover:bg-slate-100 hover:translate-y-[2px] hover:translate-x-[2px] transition-all shadow-[3px_3px_0px_0px_rgba(15,23,42,1)] active:shadow-none duration-200"
+          >
+            <Download className="w-4 h-4" strokeWidth={3} /> Export
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -193,10 +193,15 @@ async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
     if (error.message === 'Site is down for maintenance.') {
       throw error;
     }
-    // Network errors or 404s trigger client fallback
-    isStaticFallbackMode = true;
-    console.warn('Backend server connection failed. Utilizing client-side storage simulator:', error);
-    throw new Error('FALLBACK');
+    // Network errors trigger client fallback temporarily, 404s trigger it permanently
+    if (error.message === 'FALLBACK' || error.message.startsWith('API error:') === false) {
+      isStaticFallbackMode = true;
+      console.warn('Backend server connection failed. Utilizing client-side storage simulator:', error);
+      throw new Error('FALLBACK');
+    }
+    
+    // Pass real API errors up
+    throw error;
   }
 }
 

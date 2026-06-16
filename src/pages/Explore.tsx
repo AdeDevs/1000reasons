@@ -154,7 +154,8 @@ export default function Explore() {
                   }}
                 >
                   <ReasonCard 
-                    reason={reason} 
+                    reason={reason}
+                    truncateLength={120} 
                     onClick={() => {
                       const params = new URLSearchParams(location.search);
                       params.set('reason', String(reason.number));

@@ -2,5 +2,5 @@
   "name": "1000 Reasons",
   "description": "A platform showcasing 1,000 verified reasons to support Peter Obi.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }

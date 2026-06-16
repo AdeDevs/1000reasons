@@ -105,8 +105,8 @@ export default function App() {
             <h3 className="text-white font-display font-black text-2xl uppercase tracking-tighter mb-4 flex items-center gap-2">
               1000 Reasons
             </h3>
-            <p className="text-sm font-medium mb-4 max-w-sm font-sans leading-relaxed">
-               A crowd-sourced repository of verifiable reasons, achievements, and policies supporting the movement for a new Nigeria.
+            <p className="text-sm font-medium mb-4 max-w-sm font-sans leading-relaxed text-white">
+               A crowd-sourced repository of verifiable achievements, proven policies, and a track record of integrity that envisions a new Nigeria.
             </p>
             <p className="text-sm font-bold text-slate-300 uppercase tracking-widest font-display mt-6">
               Built by <span className="text-blue-400 font-cursive text-[22px] lowercase ml-1 tracking-normal">a concerned Nigerian</span>
@@ -117,7 +117,7 @@ export default function App() {
             <h4 className="text-white font-bold uppercase tracking-widest mb-2">Platform</h4>
             <Link to="/explore" className="hover:text-blue-400 w-fit transition-colors">Showcase</Link>
             <Link to="/submit" className="hover:text-blue-400 w-fit transition-colors">Submit Reason</Link>
-            <Link to="/mod" className="hover:text-blue-400 w-fit transition-colors">Mod Dashboard</Link>
+            {/* <Link to="/mod" className="hover:text-blue-400 w-fit transition-colors">Mod Dashboard</Link> */}
           </div>
           
           <div className="flex flex-col gap-3 font-display">
