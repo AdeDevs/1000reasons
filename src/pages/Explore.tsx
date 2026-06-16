@@ -4,6 +4,7 @@ import { Reason } from '../types';
 import { motion } from 'motion/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { fetchReasons as getReasons } from '../lib/api';
 
 export default function Explore() {
   const [reasons, setReasons] = useState<Reason[]>([]);
@@ -35,20 +36,11 @@ export default function Explore() {
   const fetchReasons = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        limit: itemsPerPage.toString(),
+      const data = await getReasons({
+        page: currentPage,
+        limit: itemsPerPage,
+        category: categoryParam || undefined,
       });
-      if (categoryParam && categoryParam !== 'All') {
-        params.append('category', categoryParam);
-      }
-
-      const res = await fetch(`/api/reasons?${params.toString()}`);
-      if (!res.ok) {
-        if (res.status === 503) throw new Error('Site is down for maintenance.');
-        throw new Error('Failed to fetch');
-      }
-      const data = await res.json();
       setReasons(data.data);
       setTotalPages(data.totalPages || 1);
       setTotalCount(data.total || 0);

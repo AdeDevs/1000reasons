@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Send, FileText, CheckCircle } from 'lucide-react';
 import { motion } from 'motion/react';
+import { submitReason } from '../lib/api';
 
 export default function Submit() {
   const [formData, setFormData] = useState({
@@ -29,12 +30,7 @@ export default function Submit() {
     
     setLoading(true);
     try {
-      const res = await fetch('/api/reasons', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
-      });
-      if (!res.ok) throw new Error('Submission failed');
+      await submitReason(formData);
       setSuccess(true);
     } catch (err: any) {
       setError(err.message || 'An error occurred during submission.');

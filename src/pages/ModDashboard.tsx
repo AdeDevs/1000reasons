@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Check, Trash2, Power, Eye, Users } from 'lucide-react';
 import { Reason } from '../types';
+import { getModData, approveReason, deleteReason, toggleSystem } from '../lib/api';
 
 export default function ModDashboard() {
   const [pin, setPin] = useState('');
@@ -23,8 +24,8 @@ export default function ModDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/mod/reasons');
-      setData(await res.json());
+      const result = await getModData();
+      setData(result);
     } catch(err) {
       console.error(err);
     } finally {
@@ -33,20 +34,20 @@ export default function ModDashboard() {
   };
 
   const handleApprove = async (id: string) => {
-    await fetch(`/api/mod/reasons/${id}/approve`, { method: 'POST' });
+    await approveReason(id);
     fetchData();
   };
 
   const handleDelete = async (id: string) => {
     if(confirm('Are you sure you want to delete this submission?')) {
-      await fetch(`/api/mod/reasons/${id}/delete`, { method: 'POST' });
+      await deleteReason(id);
       fetchData();
     }
   };
 
   const handleToggleSite = async () => {
     if(confirm(`Are you sure you want to take the site ${data?.isSiteUp ? 'offline' : 'online'}?`)) {
-      await fetch('/api/mod/system/toggle', { method: 'POST' });
+      await toggleSystem();
       fetchData();
     }
   };

@@ -3,6 +3,7 @@ import { ReasonCard } from '../components/ReasonCard';
 import { Reason } from '../types';
 import { motion } from 'motion/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { fetchReasons as getReasons } from '../lib/api';
 
 export default function Home() {
   const [reasons, setReasons] = useState<Reason[]>([]);
@@ -16,17 +17,10 @@ export default function Home() {
   const fetchReasons = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: '1',
-        limit: '6', // Request exactly 6 per page
+      const data = await getReasons({
+        page: 1,
+        limit: 6, // Request exactly 6 per page
       });
-
-      const res = await fetch(`/api/reasons?${params.toString()}`);
-      if (!res.ok) {
-        if (res.status === 503) throw new Error('Site is down for maintenance.');
-        throw new Error('Failed to fetch');
-      }
-      const data = await res.json();
       setReasons(data.data);
       if (data.data.length > 0 && !featuredReason) {
          setFeaturedReason(data.data[0]);

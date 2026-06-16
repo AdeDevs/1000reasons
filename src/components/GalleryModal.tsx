@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ReasonCard } from './ReasonCard';
 import { Reason } from '../types';
+import { fetchReasons as getReasons } from '../lib/api';
 
 export function GalleryModal() {
   const location = useLocation();
@@ -20,10 +21,12 @@ export function GalleryModal() {
   useEffect(() => {
     if (showModal && reasons.length === 0) {
       setLoading(true);
-      fetch('/api/reasons?limit=1000') // Fetch all approved reasons for gallery navigation
-        .then(res => res.json())
+      getReasons({ page: 1, limit: 1000 }) // Fetch all approved reasons for gallery navigation
         .then(data => {
           setReasons(data.data || []);
+        })
+        .catch(err => {
+          console.error('Failed to load gallery reasons', err);
         })
         .finally(() => setLoading(false));
     }
