@@ -1,6 +1,6 @@
 {
   "isSiteUp": true,
-  "trafficCount": 9,
+  "trafficCount": 99,
   "reasons": [
     {
       "id": "1",
@@ -120,6 +120,18 @@
       "citation": "https://vanguardngr.com",
       "status": "approved",
       "submittedBy": "Admin"
+    },
+    {
+      "id": "1781630442023",
+      "number": 13,
+      "category": "Governance",
+      "title": "mac@adeyemi 1000reasons % npm ...",
+      "content": "mac@adeyemi 1000reasons % npm run dev\n\n> react-example@0.0.0 dev\n> tsx server.ts\n\nnode:internal/modules/package_json_reader:301\n  throw new ERR_MODULE_NOT_FOUND(packageName, fileURLToPath(base), null);\n        ^\n\nError [ERR_MODULE_NOT_FOUND]: Cannot find package '@supabase/supabase-js' imported from /Users/mac/Desktop/1000reasons/server.ts\n    at Object.getPackageJSONURL (node:internal/modules/package_json_reader:301:9)\n    at packageResolve (node:internal/modules/esm/resolve:768:81)\n    at moduleResolve (node:internal/modules/esm/resolve:859:18)\n    at defaultResolve (node:internal/modules/esm/resolve:992:11)\n    at #cachedDefaultResolve (node:internal/modules/esm/loader:691:20)\n    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:708:38)\n    at nextStep (node:internal/modules/customization_hooks:189:26)\n    at resolveBaseSync (file:///Users/mac/Desktop/1000reasons/node_modules/tsx/dist/register-CqMfTiWi.mjs:2:8745)\n    at resolveDirectorySync (file:///Users/mac/Desktop/1000reasons/node_modules/tsx/dist/register-CqMfTiWi.mjs:2:9958)\n    at resolveTsPathsSync (file:///Users/mac/Desktop/1000reasons/node_modules/tsx/dist/register-CqMfTiWi.mjs:2:11190) {\n  code: 'ERR_MODULE_NOT_FOUND'\n}\n",
+      "citation": "https://aistudio.google.com/prompts/1wNDViwBI81WjaiETBpNEcPZXNHibxL1Z",
+      "status": "pending",
+      "submittedBy": "Anonymous",
+      "email": "adeyemiakinyemi01@gmail.com",
+      "anonymous": true
     }
   ]
 }

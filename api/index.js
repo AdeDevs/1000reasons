@@ -1,3 +1,4 @@
 import app from '../dist/server.cjs';
 
-export default app;
+const handler = app.default || app;
+export default handler;

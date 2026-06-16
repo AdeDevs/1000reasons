@@ -8,8 +8,7 @@ import satori from 'satori';
 import { Resvg } from '@resvg/resvg-js';
 import 'dotenv/config';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.resolve();
 
 const app = express();
 app.use(express.json());
@@ -21,7 +20,9 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || '';
 const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
 
 // Initialize data if not exists (Fallback)
-const DATA_FILE = path.join(__dirname, 'data.json');
+// MUST use /tmp on Vercel as the rest of the filesystem is read-only
+const DATA_DIR = process.env.VERCEL ? '/tmp' : __dirname;
+const DATA_FILE = path.join(DATA_DIR, 'data.json');
 const defaultData = {
   isSiteUp: true,
   trafficCount: 148,
